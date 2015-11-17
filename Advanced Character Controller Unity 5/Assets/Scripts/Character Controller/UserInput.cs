@@ -55,6 +55,9 @@ public class UserInput : MonoBehaviour
 		anim = GetComponent<Animator> ();
 
 		weaponManager = GetComponent<WeaponManager> ();
+
+		col = GetComponent<CapsuleCollider>();
+		startHeight = col.height;
     }
 
 	void CorrectIK(){
@@ -77,7 +80,29 @@ public class UserInput : MonoBehaviour
 		}
 	}
 
+
+	void AdditionalInput(){
+
+		if (anim.GetFloat ("Forward") > 0.5f) {
+			if (Input.GetButtonDown ("Crouch")) {
+				anim.SetTrigger ("Vault");
+			}
+		}
+	}
+
+	void HandleCurves(){
+		float sizeCurve = anim.GetFloat ("ColliderSize");
+		float newYcenter = 0.3f;
+
+		float lerpCenter = Mathf.Lerp (1f, newYcenter, sizeCurve);
+		col.center = new Vector3 (0, lerpCenter , 0);
+
+		col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);
+	}
+
 	void Update(){
+
+
 
 		CorrectIK ();
 		if(!ik.DebugAim)
@@ -106,6 +131,9 @@ public class UserInput : MonoBehaviour
 				weaponManager.ChangeWeapon(true);
 			}
 		}
+		
+		AdditionalInput ();
+		HandleCurves ();
 	}
 
 

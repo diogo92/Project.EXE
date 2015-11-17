@@ -64,7 +64,8 @@ public class WeaponControl : MonoBehaviour {
 					currAmmo--;
 					bulletPart.Emit (1);
 					audioSource.Play ();
-					//weaponAnim.SetTrigger("Fire");
+					if(weaponType == WeaponManager.WeaponType.Pistol)
+						weaponAnim.SetTrigger("Fire");
 					fireBullet = false;
 				} else {
 					if (MaxAmmo >= MaxClipAmmo) {
