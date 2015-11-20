@@ -41,7 +41,7 @@ public class UserInput : MonoBehaviour
 		public bool DebugAim;
 	}
 
-
+	FreeCameraLook cameraFunctions;
 
     void Start()
     {
@@ -58,6 +58,10 @@ public class UserInput : MonoBehaviour
 
 		col = GetComponent<CapsuleCollider>();
 		startHeight = col.height;
+
+		cameraFunctions = Camera.main.GetComponentInParent<FreeCameraLook> ();
+
+		offsetCross = cameraFunctions.crosshairOffsetWiggle;
     }
 
 	void CorrectIK(){
@@ -113,12 +117,18 @@ public class UserInput : MonoBehaviour
 			if(!weaponManager.ActiveWeapon.CanBurst){
 				if(Input.GetMouseButtonDown(0) || debugShoot){
 					anim.SetTrigger("Fire");
-					weaponManager.FireActiveWeapon();
+					ShootRay();
+					cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
+				//	weaponManager.FireActiveWeapon();
+
 				}
 			}else{
 				if(Input.GetMouseButton(0) || debugShoot){
 					anim.SetTrigger("Fire");
-					weaponManager.FireActiveWeapon();
+					ShootRay();
+					cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
+
+				//	weaponManager.FireActiveWeapon();
 				}
 			}
 		}
@@ -136,6 +146,43 @@ public class UserInput : MonoBehaviour
 		HandleCurves ();
 	}
 
+	public GameObject bulletPrefab;
+
+	void ShootRay(){
+		float x = Screen.width / 2;
+		float y = Screen.height / 2;
+
+		Ray ray = Camera.main.ScreenPointToRay (new Vector3 (x, y, 0));
+		RaycastHit hit;
+
+		GameObject go = Instantiate (bulletPrefab, transform.position, Quaternion.identity) as GameObject;
+		LineRenderer line = go.GetComponent<LineRenderer> ();
+		Vector3 startPos = weaponManager.ActiveWeapon.bulletSpawn.TransformPoint (Vector3.zero);
+		Vector3 endPos = Vector3.zero;
+
+		int mask = ~(1 << 8);
+		if (Physics.Raycast (ray, out hit, Mathf.Infinity, mask)) {
+			float distance = Vector3.Distance (weaponManager.ActiveWeapon.bulletSpawn.transform.position, hit.point);
+			RaycastHit[] hits = Physics.RaycastAll (startPos, hit.point - startPos, distance);
+
+			foreach (RaycastHit hit2 in hits) {
+				if (hit2.transform.GetComponent<Rigidbody> ()) {
+					Vector3 direction = hit2.transform.position - transform.position;
+					direction = direction.normalized;
+					hit2.transform.GetComponent<Rigidbody> ().AddForce (direction * 200);
+				}
+				else if (hit2.transform.GetComponent<Destructible>()){
+					hit2.transform.GetComponent<Destructible>().destruct = true;
+				}
+			}
+
+			endPos = hit.point;
+		} else {
+			endPos = ray.GetPoint(100);
+		}
+		line.SetPosition (0, startPos);
+		line.SetPosition (1, endPos); 
+	}
 
 	void LateUpdate(){
 
@@ -162,11 +209,20 @@ public class UserInput : MonoBehaviour
 		}
 	}
 
+
+	float horizontal;
+	float vertical;
+	float offsetCross;
     void FixedUpdate()
     {
 
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        horizontal = Input.GetAxis("Horizontal");
+        vertical = Input.GetAxis("Vertical");
+
+
+		if (horizontal < -offsetCross || horizontal > offsetCross || vertical < -offsetCross || vertical > offsetCross) {
+			cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,false);
+		}
 
 		if (!aim) {
 			if (cam != null) {

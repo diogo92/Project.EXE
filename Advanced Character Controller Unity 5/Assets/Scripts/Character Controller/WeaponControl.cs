@@ -11,6 +11,7 @@ public class WeaponControl : MonoBehaviour {
 	public int MaxClipAmmo = 30;
 	public int currAmmo;
 	public bool CanBurst;
+	public float Kickback = 0.1f;
 
 	public GameObject HandPosition;
 	public GameObject bulletPrefab;

@@ -21,6 +21,9 @@ public class FreeCameraLook : Pivot {
 	private float smoothXvelocity = 0;
 	private float smoothYvelocity = 0;
 
+	public Crosshair activeCrosshair;
+	public float crosshairOffsetWiggle = 0.2f;
+
 
 	protected override void Awake(){
 		base.Awake ();
@@ -36,6 +39,15 @@ public class FreeCameraLook : Pivot {
 		cam = GetComponentInChildren<Camera> ().transform;
 
 		pivot = cam.parent;
+	}
+
+	void Start(){
+		ChangeCrosshair ();
+	}
+
+	public void ChangeCrosshair(){
+		activeCrosshair = GameObject.FindGameObjectWithTag ("CrosshairManager").GetComponent<CrosshairManager>().activeCrosshair;
+
 	}
 	
 	// Update is called once per frame
@@ -58,9 +70,23 @@ public class FreeCameraLook : Pivot {
 		transform.position = Vector3.Lerp (transform.position, target.position, deltaTime * moveSpeed);
 	}
 
+	float offsetX;
+	float offsetY;
+
+	void handleOffsets(){
+		if (offsetX != 0) {
+			offsetX = Mathf.MoveTowards(offsetX,0,Time.deltaTime);
+		}
+		if (offsetY != 0) {
+			offsetY = Mathf.MoveTowards(offsetY,0,Time.deltaTime);
+		}
+	}
+
 	void HandleRotationMovement(){
-		float x = Input.GetAxis ("Mouse X");
-		float y = Input.GetAxis ("Mouse Y");
+
+		handleOffsets ();
+		float x = Input.GetAxis ("Mouse X") + offsetX;
+		float y = Input.GetAxis ("Mouse Y") + offsetY;
 
 		if (turnSmoothing > 0) {
 			smoothX = Mathf.SmoothDamp (smoothX, x, ref smoothXvelocity, turnSmoothing);
@@ -76,6 +102,18 @@ public class FreeCameraLook : Pivot {
 		tiltAngle = Mathf.Clamp (tiltAngle, - tiltMin, tiltMax);
 
 		pivot.localRotation = Quaternion.Euler (tiltAngle, 0, 0);
+
+		if (x > crosshairOffsetWiggle || x < - crosshairOffsetWiggle || y > crosshairOffsetWiggle || y < - crosshairOffsetWiggle) {
+			activeCrosshair.WiggleCrosshair();
+		}
+	}
+
+	public void WiggleCrosshairAndCamera(WeaponControl weapon, bool shoot){
+		activeCrosshair.WiggleCrosshair ();
+
+		if (shoot) {
+			offsetY = weapon.Kickback;
+		}
 	}
 
 
