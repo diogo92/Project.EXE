@@ -112,6 +112,9 @@ public class UserInput : MonoBehaviour
 		if(!ik.DebugAim)
 		aim = Input.GetMouseButton (1);
 
+		if(Input.GetKey(KeyCode.Space)){
+			anim.SetTrigger("Macarena");
+		}
 		weaponManager.aim = aim;
 		if (aim) {
 			if(!weaponManager.ActiveWeapon.CanBurst){

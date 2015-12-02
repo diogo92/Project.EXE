@@ -4,7 +4,7 @@ using System.Collections;
 public class CharMove : MonoBehaviour
 {
 
-    float moveSpeedMultiplier = 1;
+    public float moveSpeedMultiplier = 1;
     float stationaryTurnSpeed = 180; 
     float movingTurnSpeed = 360;
 
