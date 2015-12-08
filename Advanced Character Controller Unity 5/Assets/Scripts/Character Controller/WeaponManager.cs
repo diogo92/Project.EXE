@@ -7,7 +7,7 @@ public class WeaponManager : MonoBehaviour {
 	public List<GameObject> WeaponList = new List<GameObject>();
 	public WeaponControl ActiveWeapon;
 	int weaponNumber = 0;
-
+	public int MaxCarryingWeapons = 2;
 	public bool aim;
 
 	public enum WeaponType{
@@ -93,5 +93,19 @@ public class WeaponManager : MonoBehaviour {
 			}
 
 		}
+	}
+	public void ReloadActiveWeapon(){
+		int cur = ActiveWeapon.maxCarryingAmmo - (ActiveWeapon.maxCarryingAmmo - ActiveWeapon.curCarryingAmmo);
+		if (cur > 0) {
+			if(cur > ActiveWeapon.MaxClipAmmo){
+				ActiveWeapon.currAmmo = ActiveWeapon.MaxClipAmmo;
+				ActiveWeapon.curCarryingAmmo -= ActiveWeapon.MaxClipAmmo;
+			}
+			else{
+				ActiveWeapon.currAmmo = cur;
+				ActiveWeapon.curCarryingAmmo -= cur;
+			}
+		}
+	
 	}
 }

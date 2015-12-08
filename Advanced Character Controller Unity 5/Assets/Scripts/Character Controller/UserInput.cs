@@ -43,6 +43,14 @@ public class UserInput : MonoBehaviour
 
 	FreeCameraLook cameraFunctions;
 
+	public bool CanPickUp;
+	public GameObject Item;
+	public GameObject pickText;
+	public UnityEngine.UI.Text curAmmo;
+	public UnityEngine.UI.Text carryingAmmo;
+
+
+
     void Start()
     {
         if (Camera.main != null)
@@ -117,21 +125,37 @@ public class UserInput : MonoBehaviour
 		}
 		weaponManager.aim = aim;
 		if (aim) {
+			bool canFire = SharedFunctions.CheckAmmo(weaponManager.ActiveWeapon);
 			if(!weaponManager.ActiveWeapon.CanBurst){
 				if(Input.GetMouseButtonDown(0) || debugShoot){
-					anim.SetTrigger("Fire");
-					ShootRay();
-					cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
-				//	weaponManager.FireActiveWeapon();
+
+					if(canFire){
+						anim.SetTrigger("Fire");
+						ShootRay();
+						cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
+					//	weaponManager.FireActiveWeapon();
+						weaponManager.ActiveWeapon.currAmmo--;
+					}
+					else{
+						weaponManager.ReloadActiveWeapon();
+						anim.SetTrigger("Reload");
+					}
 
 				}
 			}else{
 				if(Input.GetMouseButton(0) || debugShoot){
-					anim.SetTrigger("Fire");
-					ShootRay();
-					cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
 
-				//	weaponManager.FireActiveWeapon();
+					if(canFire && !anim.GetCurrentAnimatorStateInfo(2).IsTag("Reload")){
+						anim.SetTrigger("Fire");
+						ShootRay();
+						cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
+						//	weaponManager.FireActiveWeapon();
+						weaponManager.ActiveWeapon.currAmmo--;
+					}
+					else{
+						weaponManager.ReloadActiveWeapon();
+						anim.SetTrigger("Reload");
+					}
 				}
 			}
 		}
@@ -147,8 +171,31 @@ public class UserInput : MonoBehaviour
 		
 		AdditionalInput ();
 		HandleCurves ();
+		PickupItem ();
+		UpdateUI ();
 	}
 
+	void UpdateUI(){
+		curAmmo.text = weaponManager.ActiveWeapon.currAmmo.ToString();
+		carryingAmmo.text = weaponManager.ActiveWeapon.curCarryingAmmo.ToString();
+	}
+
+
+	void PickupItem(){
+		if (CanPickUp) {
+			if (!pickText.activeInHierarchy) {
+				pickText.SetActive (true);
+			}
+			if (Input.GetKeyUp (KeyCode.F)) {
+				SharedFunctions.PickupItem (this.gameObject, Item);
+				CanPickUp = false;
+			}
+		} else {
+			if(pickText.activeInHierarchy){
+				pickText.SetActive(false);
+			}
+		}
+	}
 	public GameObject bulletPrefab;
 
 	void ShootRay(){

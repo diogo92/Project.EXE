@@ -90,6 +90,7 @@ public class CharMove : MonoBehaviour
 		}
 
 
+
         ApplyExtraTurnRotation();
         GroundCheck ();
 		SetFriction ();

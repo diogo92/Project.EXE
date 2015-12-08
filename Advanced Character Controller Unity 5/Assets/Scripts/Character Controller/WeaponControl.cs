@@ -1,11 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(ItemID))]
+[RequireComponent(typeof(Rigidbody))]
 public class WeaponControl : MonoBehaviour {
 
 
 	public bool equip;
 	public WeaponManager.WeaponType weaponType;
+
+	public int curCarryingAmmo;
+	public int maxCarryingAmmo = 50;
 
 	public int MaxAmmo;
 	public int MaxClipAmmo = 30;
@@ -23,6 +28,9 @@ public class WeaponControl : MonoBehaviour {
 	bool fireBullet;
 	AudioSource audioSource;
 	Animator weaponAnim;
+	Rigidbody rigidBody;
+	BoxCollider boxCol;
+	PickableItem pickableItem;
 
 	[Header("Positions")]
 	public bool hasOwner;
@@ -41,11 +49,18 @@ public class WeaponControl : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
+		curCarryingAmmo = maxCarryingAmmo;
 		currAmmo = MaxClipAmmo;
-		bulletSpawnGO = Instantiate (bulletPrefab, transform.position, Quaternion.identity) as GameObject;
+	/*	bulletSpawnGO = Instantiate (bulletPrefab, transform.position, Quaternion.identity) as GameObject;
 		bulletSpawnGO.AddComponent<ParticleDirection> ();
 		bulletSpawnGO.GetComponent<ParticleDirection> ().weapon = bulletSpawn;
-		bulletPart = bulletSpawnGO.GetComponent<ParticleSystem> ();
+		bulletPart = bulletSpawnGO.GetComponent<ParticleSystem> ();*/
+
+		rigidBody = GetComponent<Rigidbody> ();
+		rigidBody.isKinematic = true;
+		boxCol = GetComponent<BoxCollider> ();
+		pickableItem = GetComponentInChildren<PickableItem> ();
 
 		audioSource = GetComponent<AudioSource> ();
 		weaponAnim = GetComponent<Animator> ();
@@ -56,33 +71,22 @@ public class WeaponControl : MonoBehaviour {
 	void Update () {
 		transform.localScale = scale;
 		if (equip) {
+			if(pickableItem.gameObject.activeInHierarchy){
+				pickableItem.gameObject.SetActive(false);
+			}
 			transform.parent = transform.GetComponentInParent<WeaponManager> ().transform.GetComponent<Animator> ().GetBoneTransform (HumanBodyBones.RightHand);
 			transform.localPosition = EquipPosition;
 			transform.localRotation = Quaternion.Euler (EquipRotation);
-			if (fireBullet) {
-				if (currAmmo > 0) {
-
-					currAmmo--;
-					bulletPart.Emit (1);
-					audioSource.Play ();
-					if(weaponType == WeaponManager.WeaponType.Pistol)
-						weaponAnim.SetTrigger("Fire");
-					fireBullet = false;
-				} else {
-					if (MaxAmmo >= MaxClipAmmo) {
-						currAmmo = MaxClipAmmo;
-						MaxAmmo -= MaxClipAmmo;
-					} else {
-						currAmmo = MaxClipAmmo - (MaxClipAmmo - MaxAmmo);
-					}
-
-					fireBullet = false;
-					Debug.Log ("Reload");
-					
-				}
-			} 
 		} else {
 			if(hasOwner){
+
+				if(pickableItem.gameObject.activeInHierarchy){
+					pickableItem.gameObject.SetActive(false);
+				}
+
+				boxCol.isTrigger = true;
+				rigidBody.isKinematic = true;
+
 				switch(restPosition){
 					case RestPosition.RightHip:
 						transform.parent = transform.GetComponentInParent<WeaponManager> ().transform.GetComponent<Animator> ().GetBoneTransform (HumanBodyBones.RightUpperLeg);
@@ -94,6 +98,30 @@ public class WeaponControl : MonoBehaviour {
 
 				transform.localPosition = UnEquipPosition;
 				transform.localRotation = Quaternion.Euler(UnEquipRotation);
+			}
+			else{
+				if(!pickableItem.gameObject.activeInHierarchy){
+					pickableItem.gameObject.SetActive(true);
+				}
+
+				boxCol.isTrigger = false;
+				rigidBody.isKinematic = false;
+
+				if(pickableItem.CharacterInTrigger){
+					if(pickableItem.Owner.GetComponent<UserInput>()){
+						pickableItem.Owner.GetComponent<UserInput>().CanPickUp = true;
+						pickableItem.Owner.GetComponent<UserInput>().Item = this.gameObject;
+					}
+				}
+				else{
+					if(pickableItem.Owner){
+						if(pickableItem.Owner.GetComponent<UserInput>()){
+							pickableItem.Owner.GetComponent<UserInput>().CanPickUp = false;
+							pickableItem.Owner.GetComponent<UserInput>().Item = null;
+							pickableItem.Owner = null;
+						}
+					}
+				}
 			}
 		}
 	}
