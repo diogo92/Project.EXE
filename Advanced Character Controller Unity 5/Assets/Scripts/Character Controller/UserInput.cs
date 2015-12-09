@@ -127,9 +127,9 @@ public class UserInput : MonoBehaviour
 		if (aim) {
 			bool canFire = SharedFunctions.CheckAmmo(weaponManager.ActiveWeapon);
 			if(!weaponManager.ActiveWeapon.CanBurst){
-				if(Input.GetMouseButtonDown(0) || debugShoot){
+				if(Input.GetMouseButtonDown(0) && !anim.GetCurrentAnimatorStateInfo(2).IsTag("Reload") || debugShoot){
 
-					if(canFire){
+					if(canFire ){
 						anim.SetTrigger("Fire");
 						ShootRay();
 						cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
@@ -143,9 +143,9 @@ public class UserInput : MonoBehaviour
 
 				}
 			}else{
-				if(Input.GetMouseButton(0) || debugShoot){
+				if(Input.GetMouseButton(0) && !anim.GetCurrentAnimatorStateInfo(2).IsTag("Reload") || debugShoot){
 
-					if(canFire && !anim.GetCurrentAnimatorStateInfo(2).IsTag("Reload")){
+					if(canFire ){
 						anim.SetTrigger("Fire");
 						ShootRay();
 						cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
@@ -210,7 +210,7 @@ public class UserInput : MonoBehaviour
 		Vector3 startPos = weaponManager.ActiveWeapon.bulletSpawn.TransformPoint (Vector3.zero);
 		Vector3 endPos = Vector3.zero;
 
-		int mask = ~(1 << 8);
+		int mask = ~(1 << 9);
 		if (Physics.Raycast (ray, out hit, Mathf.Infinity, mask)) {
 			float distance = Vector3.Distance (weaponManager.ActiveWeapon.bulletSpawn.transform.position, hit.point);
 			RaycastHit[] hits = Physics.RaycastAll (startPos, hit.point - startPos, distance);

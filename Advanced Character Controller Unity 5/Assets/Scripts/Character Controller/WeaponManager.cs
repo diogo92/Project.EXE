@@ -15,9 +15,11 @@ public class WeaponManager : MonoBehaviour {
 		Rifle
 	}
 
+	public GameObject bulletPrefab;
 	public WeaponType weaponType;
 
 	Animator anim;
+
 
 	float IKweight;
 
