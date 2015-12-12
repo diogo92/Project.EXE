@@ -8,6 +8,14 @@ public class ItemID : MonoBehaviour {
 	public enum ItemType{
 		Weapon,
 		Health,
-		Wearable
+		Wearable,
+		Power
 	}
+
+	/*
+	 * POWERS - 
+	 * 1 - Double Jump
+	 * 
+	 * */
+	public int power;
 }

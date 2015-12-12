@@ -5,4 +5,5 @@ public class CharacterStats : MonoBehaviour {
 
 	public string Id;
 	public float Health;
+	public GameObject dropable;
 }

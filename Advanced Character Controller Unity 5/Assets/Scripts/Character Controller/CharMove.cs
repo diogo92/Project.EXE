@@ -4,11 +4,16 @@ using System.Collections;
 public class CharMove : MonoBehaviour
 {
 
+	public float raything1 = 0.1f;
+	public float raything2 = 0.1f;
     public float moveSpeedMultiplier = 1;
     float stationaryTurnSpeed = 180; 
     float movingTurnSpeed = 360;
 
     public bool onGround; 
+	public bool jump = false;
+	public bool hasDoubleJumpAbility = false;
+	public bool doubleJump = false;
 
     Animator animator;
 
@@ -70,7 +75,7 @@ public class CharMove : MonoBehaviour
         }
     }
 
-    public void Move(Vector3 move, bool aim, Vector3 lookPos)
+    public void Move(Vector3 move, bool aim, Vector3 lookPos, bool jumpInput)
     {    
 		//Vector3 move is the input in the world space
         if (move.magnitude > 1) //Make sure that the movement is normalized
@@ -92,15 +97,18 @@ public class CharMove : MonoBehaviour
 
 
         ApplyExtraTurnRotation();
-        GroundCheck ();
-		SetFriction ();
 
+		GroundCheck ();
+		SetFriction ();
+		if (jumpInput)
+			Jump ();
 		if (onGround) {
 			HandleGroundVelocities ();
 		} else {
 
 			HandleAirborneVelocities();
 		}
+
         UpdateAnimator();
 
     }
@@ -135,9 +143,9 @@ public class CharMove : MonoBehaviour
    
     void GroundCheck()
     {
-        Ray ray = new Ray(transform.position + Vector3.up * .1f, -Vector3.up);
-
-        RaycastHit[] hits = Physics.RaycastAll(ray, .1f);
+        Ray ray = new Ray(transform.position + Vector3.up * raything1, -Vector3.up);
+		
+		RaycastHit[] hits = Physics.RaycastAll(ray, raything2);
         rayHitComparer = new RayHitComparer();
         System.Array.Sort(hits, rayHitComparer);
 
@@ -147,14 +155,18 @@ public class CharMove : MonoBehaviour
             rigidBody.useGravity = true;
 
             foreach (var hit in hits)
-            { 
+			{ Debug.DrawLine (ray.origin,hit.point,Color.red);
                 if (!hit.collider.isTrigger)
                 {
+
                     if (velocity.y <= 0)
                     {
-                          rigidBody.position = Vector3.MoveTowards(rigidBody.position, hit.point, Time.deltaTime * 100);
+
+                        rigidBody.position = Vector3.MoveTowards(rigidBody.position, hit.point, Time.deltaTime * 100);
                     }
 
+					jump = false;
+					doubleJump = false;
                     onGround = true; 
                     rigidBody.useGravity = false; 
                 }
@@ -165,6 +177,14 @@ public class CharMove : MonoBehaviour
 			lastAirTime = Time.time;
 		}
     }
+
+	void Update(){
+		if (!onGround) {
+			if(rigidBody.velocity.y ==0){
+				rigidBody.position = new Vector3(rigidBody.position.x,rigidBody.position.y+0.1f,rigidBody.position.z);
+			}
+		}
+	}
 
 	void TurnTowardsCameraForward(){
 		if (Mathf.Abs (forwardAmount) < .01f) {
@@ -206,9 +226,9 @@ public class CharMove : MonoBehaviour
 
 		rigidBody.useGravity = true;
 
-		Vector3 extraGravityForce = (Physics.gravity * 2);
+		//Vector3 extraGravityForce = (Physics.gravity * 2);
 
-		rigidBody.AddForce (extraGravityForce);
+		//rigidBody.AddForce (extraGravityForce);
 	}
 
     class RayHitComparer : IComparer
@@ -218,5 +238,20 @@ public class CharMove : MonoBehaviour
             return ((RaycastHit)x).distance.CompareTo(((RaycastHit)y).distance);
         }
     }
+
+	void Jump(){
+		if (!jump) {
+				jump = true;
+				rigidBody.velocity = new Vector3 (rigidBody.velocity.x, jumpPower * 0.5f, rigidBody.velocity.z);
+				onGround = false;
+				rigidBody.useGravity = true;
+				animator.SetTrigger ("Jump");
+		} else if (hasDoubleJumpAbility && !doubleJump) {
+				doubleJump = true;
+				rigidBody.velocity = new Vector3 (rigidBody.velocity.x, jumpPower * 0.5f, rigidBody.velocity.z);
+				//animator.SetTrigger ("Jump");
+		}
+			
+	}
 
 }

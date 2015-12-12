@@ -26,7 +26,7 @@ public class EnemyAI : MonoBehaviour {
 
 	public List<GameObject> Enemies = new List<GameObject>();
 	public GameObject EnemyToAttack;
-
+	
 
 	public enum AIstate{
 		Patrol,Attack
@@ -51,6 +51,15 @@ public class EnemyAI : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+		if (GetComponent<CharacterStats> ().Health <= 0) {
+			print("dead");
+			if(GetComponent<CharacterStats> ().dropable != null){
+				GameObject go = Instantiate((Object)GetComponent<CharacterStats> ().dropable,transform.position,Quaternion.identity) as GameObject;
+			}
+			this.gameObject.SetActive(false);
+			Destroy(this.gameObject);
+		}
 		DecideState ();
 
 		switch (aiState) {
@@ -96,7 +105,7 @@ public class EnemyAI : MonoBehaviour {
 		anim.SetFloat ("Forward", 0);
 		weaponManager.aim = true;
 
-		charMove.Move (Vector3.zero, true, Vector3.zero);
+		charMove.Move (Vector3.zero, true, Vector3.zero,false);
 
 		Vector3 direction = EnemyToAttack.transform.position - transform.position;
 		float angle = Vector3.Angle(direction, transform.forward);
@@ -187,14 +196,14 @@ public class EnemyAI : MonoBehaviour {
 
 			Vector3 velocity = agent.desiredVelocity * 0.5f;
 
-			charMove.Move(velocity,false,targetPos);
+			charMove.Move(velocity,false,targetPos,false);
 		}
 		else{
 			agent.transform.position = transform.position;
 
 			Vector3 lookPos = (waypoints.Count > 0)? waypoints[waypointIndex].position : Vector3.zero;
 
-			charMove.Move(Vector3.zero,false,lookPos);
+			charMove.Move(Vector3.zero,false,lookPos,false);
 		}
 	}
 }

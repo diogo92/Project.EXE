@@ -34,6 +34,12 @@ public class SharedFunctions : MonoBehaviour {
 			break;
 		case ItemID.ItemType.Wearable:
 			break;
+		case ItemID.ItemType.Power:
+			owner.GetComponent<UserInput>().holdingPower = item;
+			item.transform.parent=owner.transform;
+			item.transform.position=owner.transform.position;
+			item.transform.localScale = new Vector3(0,0,0);
+			break;
 		}
 	}
 
@@ -43,5 +49,5 @@ public class SharedFunctions : MonoBehaviour {
 		} else
 			return false;
 	}
-	
+
 }

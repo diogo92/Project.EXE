@@ -7,6 +7,7 @@ public class UserInput : MonoBehaviour
 
     public bool walkByDefault = false;
 
+	bool jump = false;
     private CharMove character;
     private Transform cam;
     private Vector3 camForward;
@@ -51,6 +52,8 @@ public class UserInput : MonoBehaviour
 
 
 
+	public GameObject holdingPower;
+
     void Start()
     {
         if (Camera.main != null)
@@ -94,25 +97,31 @@ public class UserInput : MonoBehaviour
 
 
 	void AdditionalInput(){
-
-		if (anim.GetFloat ("Forward") > 0.5f) {
+	/*	if (anim.GetFloat ("Forward") > 0.5f) {
 			if (Input.GetButtonDown ("Crouch")) {
 				anim.SetTrigger ("Vault");
 			}
+		}*/
+		if (Input.GetButtonDown ("Crouch")) {
+			jump = true;
+		}
+		if (Input.GetKeyDown (KeyCode.U)) {
+			transform.position = new Vector3(transform.position.x,transform.position.y + 0.05f,transform.position.z);
 		}
 	}
 
 	void HandleCurves(){
-		float sizeCurve = anim.GetFloat ("ColliderSize");
-		float newYcenter = 0.3f;
+		/*float sizeCurve = anim.GetFloat ("ColliderSize");
+		float newYcenter = 0.1f;
 
-		float lerpCenter = Mathf.Lerp (1f, newYcenter, sizeCurve);
+		float lerpCenter = Mathf.Lerp (0.1f, newYcenter, sizeCurve);
 		col.center = new Vector3 (0, lerpCenter , 0);
 
-		col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);
+		col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 	}
 
 	void Update(){
+
 
 
 
@@ -120,9 +129,7 @@ public class UserInput : MonoBehaviour
 		if(!ik.DebugAim)
 		aim = Input.GetMouseButton (1);
 
-		if(Input.GetKey(KeyCode.Space)){
-			anim.SetTrigger("Macarena");
-		}
+
 		weaponManager.aim = aim;
 		if (aim) {
 			bool canFire = SharedFunctions.CheckAmmo(weaponManager.ActiveWeapon);
@@ -189,6 +196,16 @@ public class UserInput : MonoBehaviour
 			if (Input.GetKeyUp (KeyCode.F)) {
 				SharedFunctions.PickupItem (this.gameObject, Item);
 				CanPickUp = false;
+				if(holdingPower != null){
+					switch(holdingPower.GetComponent<ItemID>().power){
+					case 1:
+						character.hasDoubleJumpAbility = true;
+						break;
+					default:
+						character.hasDoubleJumpAbility = false;
+						break;
+					}
+				}
 			}
 		} else {
 			if(pickText.activeInHierarchy){
@@ -219,6 +236,8 @@ public class UserInput : MonoBehaviour
 				if (hit2.transform.GetComponent<Rigidbody> ()) {
 					Vector3 direction = hit2.transform.position - transform.position;
 					direction = direction.normalized;
+					if(hit2.transform.GetComponent<CharacterStats>())
+						hit2.transform.GetComponent<CharacterStats>().Health--;
 					hit2.transform.GetComponent<Rigidbody> ().AddForce (direction * 200);
 				}
 				else if (hit2.transform.GetComponent<Destructible>()){
@@ -265,6 +284,8 @@ public class UserInput : MonoBehaviour
 	float offsetCross;
     void FixedUpdate()
     {
+
+
 
         horizontal = Input.GetAxis("Horizontal");
         vertical = Input.GetAxis("Vertical");
@@ -336,7 +357,8 @@ public class UserInput : MonoBehaviour
 		lookPos = lookInCameraDirection && cam != null ? transform.position + cam.forward * 100 : transform.position + transform.forward * 100;
 
         move *= walkMultiplier;
-        character.Move(move,aim,lookPos);
+        character.Move(move,aim,lookPos,jump);
+		jump = false;
     }
 
 }
