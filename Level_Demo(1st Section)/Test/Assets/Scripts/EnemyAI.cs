@@ -7,7 +7,7 @@ public class EnemyAI : MonoBehaviour {
 
 	NavMeshAgent agent;
 	CharMove charMove;
-
+	public GameObject fightObject;
 	public GameObject waypointHolder;
 	public List<Transform> waypoints = new List<Transform>();
 	float targetTolerance = 1;	
@@ -21,7 +21,7 @@ public class EnemyAI : MonoBehaviour {
 
 	float patrolTimer;
 	public float waitingTime = 4;
-	public float attackRate = 4;
+	public float attackRate = 2;
 	float attackTimer;
 
 	public List<GameObject> Enemies = new List<GameObject>();
@@ -53,11 +53,14 @@ public class EnemyAI : MonoBehaviour {
 	void Update () {
 
 		if (GetComponent<CharacterStats> ().Health <= 0) {
-			if(GetComponent<CharacterStats> ().dropable != null){
-				GameObject go = Instantiate((Object)GetComponent<CharacterStats> ().dropable,transform.position,Quaternion.identity) as GameObject;
+			anim.SetTrigger("Die");
+			if(anim.GetCurrentAnimatorStateInfo(0).IsTag("Dead")){
+				if(GetComponent<CharacterStats> ().dropable != null){
+					GameObject go = Instantiate((Object)GetComponent<CharacterStats> ().dropable,transform.position,Quaternion.identity) as GameObject;
+				}
+				this.gameObject.SetActive(false);
+				Destroy(this.gameObject);
 			}
-			this.gameObject.SetActive(false);
-			Destroy(this.gameObject);
 			return;
 		}
 		DecideState ();
@@ -84,7 +87,6 @@ public class EnemyAI : MonoBehaviour {
 						if(Physics.Raycast(transform.position + transform.up, direction.normalized, out hit, 15)){
 							if(hit.collider.gameObject.GetComponent<CharacterStats>()){
 								if(hit.collider.gameObject.GetComponent<CharacterStats>().Id != GetComponent<CharacterStats>().Id){
-									Debug.Log("!!!");
 
 									EnemyToAttack = hit.collider.gameObject;
 								}
@@ -100,7 +102,7 @@ public class EnemyAI : MonoBehaviour {
 	}
 
 	void Attack(){
-		agent.Stop ();
+		/*agent.Stop ();
 		anim.SetFloat ("Turn", 0);
 		anim.SetFloat ("Forward", 0);
 		weaponManager.aim = true;
@@ -119,7 +121,33 @@ public class EnemyAI : MonoBehaviour {
 		if (attackTimer > attackRate) {
 			ShootRay();
 			attackTimer = 0;
+		}*/
+		agent.speed = 1;
+		if (agent.remainingDistance >= agent.stoppingDistance) {
+			agent.transform.position = transform.position;
+			agent.destination = EnemyToAttack.transform.position;
+			Vector3 velocity = agent.desiredVelocity * 0.5f;
+			charMove.Move (velocity, false, targetPos, false);
 		}
+		transform.LookAt(EnemyToAttack.transform.position);
+		attackTimer += Time.deltaTime;
+		
+		if (attackTimer > attackRate) {
+			anim.SetTrigger ("Fire");
+			if (fightObject.GetComponent<FightObjectScript> ().enemies.Count > 0) {
+				for(int i = fightObject.GetComponent<FightObjectScript> ().enemies.Count - 1;i >= 0; i--){
+					if(!((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().GetCurrentAnimatorStateInfo(0).IsTag("Dying")){
+					((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().SetTrigger("Take_Punch");
+					((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<CharacterStats> ().Health--;
+					if(((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject == null)
+						fightObject.GetComponent<FightObjectScript> ().enemies.RemoveAt (i);
+					}
+				}
+				
+			}
+			attackTimer = 0;
+		}
+		
 	}
 
 	void OnAnimatorIK(){

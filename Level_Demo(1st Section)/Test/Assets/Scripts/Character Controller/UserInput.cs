@@ -134,7 +134,7 @@ col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 	IEnumerator resetAttack ()
 	{
 		attack = false;
-		yield return new WaitForSeconds (0.3f);
+		yield return new WaitForSeconds (0.7f);
 		attack = true;
 	}
 
@@ -142,7 +142,15 @@ col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 	{
 
 
-
+		if (GetComponent<CharacterStats> ().Health <= 0) {
+			anim.SetTrigger("Die");
+			if(anim.GetCurrentAnimatorStateInfo(0).IsTag("Dead")){
+				this.gameObject.SetActive(false);
+				Destroy(this.gameObject);
+				Application.LoadLevel(Application.loadedLevel);
+			}
+			return;
+		}
 
 		CorrectIK ();
 		if (!ik.DebugAim)
@@ -161,8 +169,12 @@ col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 			anim.SetTrigger ("Fire");
 			if (fightObject.GetComponent<FightObjectScript> ().enemies.Count > 0) {
 				for(int i = fightObject.GetComponent<FightObjectScript> ().enemies.Count - 1;i >= 0; i--){
+					if(!((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().GetCurrentAnimatorStateInfo(0).IsTag("Dying")){
+					((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().SetTrigger("Take_Punch");
 					((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<CharacterStats> ().Health--;
-					fightObject.GetComponent<FightObjectScript> ().enemies.RemoveAt (i);
+					if(((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject == null)
+						fightObject.GetComponent<FightObjectScript> ().enemies.RemoveAt (i);
+					}
 				}
 
 			}

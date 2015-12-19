@@ -10,7 +10,7 @@ public class FightObjectScript : MonoBehaviour {
 
 	void OnTriggerEnter (Collider other){
 		if (other.transform.parent) {
-			if (other.gameObject.transform.parent.tag == "Enemy" && !enemies.Contains (other)) {
+			if (other.transform.parent.GetComponent<CharacterStats>() && other.gameObject.transform.parent.tag != gameObject.tag && !enemies.Contains (other)) {
 				if (other.GetType () == typeof(BoxCollider)) {
 					enemies.Add (other);
 				}
