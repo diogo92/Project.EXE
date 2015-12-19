@@ -27,10 +27,12 @@ public class XrayPower : MonoBehaviour
 						//	lastHit.GetComponent<Renderer> ().material = materials [1];
 						//	lastHit.GetComponent<Renderer> ().material.shader = Shader.Find ("Standard");
 						}
-						hit.transform.gameObject.GetComponent<Renderer> ().material = materials [1];
-						//hit.transform.gameObject.GetComponent<Renderer> ().material.shader = Shader.Find ("mShaders/XRay1");
+						if (hit.transform.gameObject.tag == "Invisible"){
+							hit.transform.gameObject.GetComponent<Renderer> ().material = materials [1];
+							//hit.transform.gameObject.GetComponent<Renderer> ().material.shader = Shader.Find ("mShaders/XRay1");
+
+						}
 						lastHit = hit.transform.gameObject;
-									
 					}	
 				} else {
 					if (hit.transform.gameObject.tag == "Invisible"){

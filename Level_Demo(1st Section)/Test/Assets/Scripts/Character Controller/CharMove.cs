@@ -158,9 +158,6 @@ public class CharMove : MonoBehaviour
 		RaycastHit[] hits = Physics.RaycastAll (ray, raything2);
 		rayHitComparer = new RayHitComparer ();
 		System.Array.Sort (hits, rayHitComparer);
-		if (tag == "Player")
-			print (rigidBody.velocity.y);
-
 		if (velocity.y < jumpPower * .5f) { 	
 			onGround = false;
 			rigidBody.useGravity = true;
@@ -190,7 +187,7 @@ public class CharMove : MonoBehaviour
 	void Update ()
 	{
 		if (!onGround) {
-			if (Mathf.Abs(rigidBody.velocity.y) < 0.01f) {
+			if (Mathf.Abs(rigidBody.velocity.y) < 0.001f) {
 				rigidBody.position = new Vector3 (rigidBody.position.x + 0.1f, rigidBody.position.y + 0.1f, rigidBody.position.z +0.1f);
 			}
 		}

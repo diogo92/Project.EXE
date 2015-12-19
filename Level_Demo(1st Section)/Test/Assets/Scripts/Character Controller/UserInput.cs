@@ -1,22 +1,24 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
-
 
 public class UserInput : MonoBehaviour
 {
 
-    public bool walkByDefault = false;
 
+	public GameObject fightObject;
+
+	public bool walkByDefault = false;
 	bool jump = false;
-    private CharMove character;
-    private Transform cam;
-    private Vector3 camForward;
-    private Vector3 move;
-
-	//Camera
-	//float cameraForward;
+	private CharMove character;
+	private Transform cam;
+	private Vector3 camForward;
+	private Vector3 move;
+//Camera
+//float cameraForward;
 	public bool aim;
 	public float aimingWeight;
+
+	bool attack = true;
 
 	public bool lookInCameraDirection;
 	Vector3 lookPos;
@@ -30,10 +32,13 @@ public class UserInput : MonoBehaviour
 	CapsuleCollider col;
 	float startHeight;
 	Animator anim;
-	//Ik stuff
+//Ik stuff
 
-	[SerializeField] public IK ik;
-	[System.Serializable] public class IK{
+	[SerializeField]
+	public IK ik;
+	[System.Serializable]
+	public class IK
+	{
 		public Transform spine;
 		public float aimingZ = 213.46f;
 		public float aimingX = -65.97f;
@@ -54,32 +59,34 @@ public class UserInput : MonoBehaviour
 
 	public GameObject holdingPower;
 
-    void Start()
-    {
-        if (Camera.main != null)
-        {
-            cam = Camera.main.transform;
-        }
+	void Start ()
+	{
+		if (Camera.main != null) {
+			cam = Camera.main.transform;
+		}
 
-        character = GetComponent<CharMove>();
+		character = GetComponent<CharMove> ();
 
 		anim = GetComponent<Animator> ();
 
+
+
 		weaponManager = GetComponent<WeaponManager> ();
 
-		col = GetComponent<CapsuleCollider>();
+		col = GetComponent<CapsuleCollider> ();
 		startHeight = col.height;
 
 		cameraFunctions = Camera.main.GetComponentInParent<FreeCameraLook> ();
 
 		offsetCross = cameraFunctions.crosshairOffsetWiggle;
-    }
+	}
 
-	void CorrectIK(){
+	void CorrectIK ()
+	{
 		weaponType = weaponManager.weaponType;
 
 		if (!ik.DebugAim) {
-			switch(weaponType){
+			switch (weaponType) {
 			case WeaponManager.WeaponType.Pistol:
 				ik.aimingZ = 212.19f;
 				ik.aimingX = -63.8f;
@@ -96,108 +103,130 @@ public class UserInput : MonoBehaviour
 	}
 
 
-	void AdditionalInput(){
-	/*	if (anim.GetFloat ("Forward") > 0.5f) {
-			if (Input.GetButtonDown ("Crouch")) {
-				anim.SetTrigger ("Vault");
-			}
-		}*/
+	void AdditionalInput ()
+	{
+/*	if (anim.GetFloat ("Forward") > 0.5f) {
+	if (Input.GetButtonDown ("Crouch")) {
+		anim.SetTrigger ("Vault");
+	}
+}*/
 		if (Input.GetButtonDown ("Crouch")) {
 			jump = true;
 		}
 		if (Input.GetKeyDown (KeyCode.U)) {
-			transform.position = new Vector3(transform.position.x,transform.position.y + 0.05f,transform.position.z);
+			transform.position = new Vector3 (transform.position.x, transform.position.y + 0.05f, transform.position.z);
 		}
 	}
 
-	void HandleCurves(){
-		/*float sizeCurve = anim.GetFloat ("ColliderSize");
-		float newYcenter = 0.1f;
+	void HandleCurves ()
+	{
+/*float sizeCurve = anim.GetFloat ("ColliderSize");
+float newYcenter = 0.1f;
 
-		float lerpCenter = Mathf.Lerp (0.1f, newYcenter, sizeCurve);
-		col.center = new Vector3 (0, lerpCenter , 0);
+float lerpCenter = Mathf.Lerp (0.1f, newYcenter, sizeCurve);
+col.center = new Vector3 (0, lerpCenter , 0);
 
-		col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
+col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 	}
 
-	void Update(){
+
+
+	IEnumerator resetAttack ()
+	{
+		attack = false;
+		yield return new WaitForSeconds (0.3f);
+		attack = true;
+	}
+
+	void Update ()
+	{
 
 
 
 
 		CorrectIK ();
-		if(!ik.DebugAim)
-		aim = Input.GetMouseButton (1);
+		if (!ik.DebugAim)
+			aim = Input.GetMouseButton (1);
 
 
 		weaponManager.aim = aim;
-		if (aim) {
-			if(holdingPower != null && holdingPower.GetComponent<ItemID>().power == 2){
-				GetComponent<XrayPower>().XRayPower();
-			}
-			bool canFire = SharedFunctions.CheckAmmo(weaponManager.ActiveWeapon);
-			if(!weaponManager.ActiveWeapon.CanBurst){
-				if(Input.GetMouseButtonDown(0) && !anim.GetCurrentAnimatorStateInfo(2).IsTag("Reload") || debugShoot){
-
-					if(canFire ){
-						anim.SetTrigger("Fire");
-						ShootRay();
-						cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
-					//	weaponManager.FireActiveWeapon();
-						weaponManager.ActiveWeapon.currAmmo--;
-					}
-					else{
-						weaponManager.ReloadActiveWeapon();
-						anim.SetTrigger("Reload");
-					}
-
+//if (aim) {
+		if (holdingPower != null && holdingPower.GetComponent<ItemID> ().power == 2) {
+			GetComponent<XrayPower> ().XRayPower ();
+		}
+		bool canFire = SharedFunctions.CheckAmmo (weaponManager.ActiveWeapon);
+		//if(!weaponManager.ActiveWeapon.CanBurst){
+		if (Input.GetMouseButtonDown (0) && attack/* && !anim.GetCurrentAnimatorStateInfo(2).IsTag("Reload") || debugShoot*/) {
+			StartCoroutine ("resetAttack");
+			anim.SetTrigger ("Fire");
+			if (fightObject.GetComponent<FightObjectScript> ().enemies.Count > 0) {
+				for(int i = fightObject.GetComponent<FightObjectScript> ().enemies.Count - 1;i >= 0; i--){
+					((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<CharacterStats> ().Health--;
+					fightObject.GetComponent<FightObjectScript> ().enemies.RemoveAt (i);
 				}
-			}else{
-				if(Input.GetMouseButton(0) && !anim.GetCurrentAnimatorStateInfo(2).IsTag("Reload") || debugShoot){
 
-					if(canFire ){
-						anim.SetTrigger("Fire");
-						ShootRay();
-						cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
-						//	weaponManager.FireActiveWeapon();
-						weaponManager.ActiveWeapon.currAmmo--;
-					}
-					else{
-						weaponManager.ReloadActiveWeapon();
-						anim.SetTrigger("Reload");
-					}
-				}
 			}
-		}
-		else{
-			if(holdingPower != null && holdingPower.GetComponent<ItemID>().power == 2){
-				GetComponent<XrayPower>().StopXRay();
+			/*if(canFire ){
+			//	anim.SetTrigger("Fire");
+				//ShootRay();
+			//	cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
+			//	weaponManager.FireActiveWeapon();
+			//	weaponManager.ActiveWeapon.currAmmo--;
 			}
-		}
+			else{
+			//	weaponManager.ReloadActiveWeapon();
+			//	anim.SetTrigger("Reload");
+			}*/
 
-		if(Input.GetAxis("Mouse ScrollWheel") !=0 ){
-			if(Input.GetAxis("Mouse ScrollWheel") <= -0.1f){
-				weaponManager.ChangeWeapon(false);
+			//}
+			/*//}else{
+		if(Input.GetMouseButton(0) && !anim.GetCurrentAnimatorStateInfo(2).IsTag("Reload") || debugShoot){
+
+			if(canFire ){
+				anim.SetTrigger("Fire");
+				ShootRay();
+				cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,true);
+				//	weaponManager.FireActiveWeapon();
+				weaponManager.ActiveWeapon.currAmmo--;
 			}
-			
-			if(Input.GetAxis("Mouse ScrollWheel") > -0.1f){
-				weaponManager.ChangeWeapon(true);
+			else{
+				weaponManager.ReloadActiveWeapon();
+				anim.SetTrigger("Reload");
 			}
 		}
-		
+	}
+}
+else{
+	if(holdingPower != null && holdingPower.GetComponent<ItemID>().power == 2){
+		GetComponent<XrayPower>().StopXRay();
+	}
+}*/
+
+/*if(Input.GetAxis("Mouse ScrollWheel") !=0 ){
+	if(Input.GetAxis("Mouse ScrollWheel") <= -0.1f){
+		weaponManager.ChangeWeapon(false);
+	}
+	
+	if(Input.GetAxis("Mouse ScrollWheel") > -0.1f){
+		weaponManager.ChangeWeapon(true);
+	}
+}*/
+		}
 		AdditionalInput ();
 		HandleCurves ();
 		PickupItem ();
 		UpdateUI ();
 	}
 
-	void UpdateUI(){
-		curAmmo.text = weaponManager.ActiveWeapon.currAmmo.ToString();
-		carryingAmmo.text = weaponManager.ActiveWeapon.curCarryingAmmo.ToString();
+	void UpdateUI ()
+	{
+		curAmmo.text = weaponManager.ActiveWeapon.currAmmo.ToString ();
+		carryingAmmo.text = weaponManager.ActiveWeapon.curCarryingAmmo.ToString ();
 	}
 
 
-	void PickupItem(){
+	void PickupItem ()
+	{
 		if (CanPickUp) {
 			if (!pickText.activeInHierarchy) {
 				pickText.SetActive (true);
@@ -205,9 +234,9 @@ public class UserInput : MonoBehaviour
 			if (Input.GetKeyUp (KeyCode.F)) {
 				SharedFunctions.PickupItem (this.gameObject, Item);
 				CanPickUp = false;
-				if(holdingPower != null){
+				if (holdingPower != null) {
 
-					switch(holdingPower.GetComponent<ItemID>().power){
+					switch (holdingPower.GetComponent<ItemID> ().power) {
 					case 1:
 						character.hasDoubleJumpAbility = true;
 						break;
@@ -219,14 +248,15 @@ public class UserInput : MonoBehaviour
 
 			}
 		} else {
-			if(pickText.activeInHierarchy){
-				pickText.SetActive(false);
+			if (pickText.activeInHierarchy) {
+				pickText.SetActive (false);
 			}
 		}
 	}
 	public GameObject bulletPrefab;
 
-	void ShootRay(){
+	void ShootRay ()
+	{
 		float x = Screen.width / 2;
 		float y = Screen.height / 2;
 
@@ -247,49 +277,50 @@ public class UserInput : MonoBehaviour
 				if (hit2.transform.GetComponent<Rigidbody> ()) {
 					Vector3 direction = hit2.transform.position - transform.position;
 					direction = direction.normalized;
-					if(hit2.transform.GetComponent<CharacterStats>() && hit2.collider.name!="Sight")
-						hit2.transform.GetComponent<CharacterStats>().Health--;
+					if (hit2.transform.GetComponent<CharacterStats> () && hit2.collider.name != "Sight")
+						hit2.transform.GetComponent<CharacterStats> ().Health--;
 					hit2.transform.GetComponent<Rigidbody> ().AddForce (direction * 200);
-				}
-				else if (hit2.transform.GetComponent<Destructible>()){
-					hit2.transform.GetComponent<Destructible>().destruct = true;
+				} else if (hit2.transform.GetComponent<Destructible> ()) {
+					hit2.transform.GetComponent<Destructible> ().destruct = true;
 				}
 			}
 
 			endPos = hit.point;
 		} else {
-			endPos = ray.GetPoint(100);
+			endPos = ray.GetPoint (100);
 		}
 		line.SetPosition (0, startPos);
 		line.SetPosition (1, endPos); 
 	}
 
-	void LateUpdate(){
+	void LateUpdate ()
+	{
 
 
 		aimingWeight = Mathf.MoveTowards (aimingWeight, (aim) ? 1.0f : 0.0f, Time.deltaTime * 5);
 
 		Vector3 normalState = new Vector3 (0, 0, -2f);
-		Vector3 aimingState = new Vector3 (0, 0, -0.5f);
+		Vector3 aimingState = new Vector3 (0, 0, -2f);
 
 		Vector3 pos = Vector3.Lerp (normalState, aimingState, aimingWeight);
 
 		cam.transform.localPosition = pos;
 
-		if (aim) {
-			Vector3 eulerAngleOffset = Vector3.zero;
-			eulerAngleOffset = new Vector3(ik.aimingX,ik.aimingY,ik.aimingZ);
+/*	if (aim) {
+	Vector3 eulerAngleOffset = Vector3.zero;
+	eulerAngleOffset = new Vector3(ik.aimingX,ik.aimingY,ik.aimingZ);
 
-			Ray ray = new Ray(cam.position, cam.forward);
+	Ray ray = new Ray(cam.position, cam.forward);
 
-			Vector3 lookPosition = ray.GetPoint(ik.point);
+	Vector3 lookPosition = ray.GetPoint(ik.point);
 
-			ik.spine.LookAt(lookPosition);
-			ik.spine.Rotate(eulerAngleOffset,Space.Self);
-		}
+	ik.spine.LookAt(lookPosition);
+	ik.spine.Rotate(eulerAngleOffset,Space.Self);
+}*/
 	}
 
-	void Die(){
+	void Die ()
+	{
 		Application.LoadLevel (Application.loadedLevel);
 	}
 
@@ -297,79 +328,70 @@ public class UserInput : MonoBehaviour
 	float horizontal;
 	float vertical;
 	float offsetCross;
-    void FixedUpdate()
-    {
-        horizontal = Input.GetAxis("Horizontal");
-        vertical = Input.GetAxis("Vertical");
+	void FixedUpdate ()
+	{
+		horizontal = Input.GetAxis ("Horizontal");
+		vertical = Input.GetAxis ("Vertical");
 
 
 		if (horizontal < -offsetCross || horizontal > offsetCross || vertical < -offsetCross || vertical > offsetCross) {
-			cameraFunctions.WiggleCrosshairAndCamera(weaponManager.ActiveWeapon,false);
+			cameraFunctions.WiggleCrosshairAndCamera (weaponManager.ActiveWeapon, false);
 		}
 
-		if (!aim) {
-			if (cam != null) {
-				//Take the forward vector of the camera (from its transform) and
-				//eliminate the y component
-				//scale the camera forward with the mask (1,0,1) to eliminate y and normalize it
-				camForward = Vector3.Scale (cam.forward, new Vector3 (1, 0, 1)).normalized;
-	            
-				//move input front/backward = forward direction of the camera * user input amount (vertical)
-				//move input left/right = right direction of the camera * user input amount (horizontal)
-				move = vertical * camForward + horizontal * cam.right;
-			} else {
-
-				//if there is not a camera, use the global forward (+z) and right ( +x)
-				move = vertical * Vector3.forward + horizontal * Vector3.right;
-			}
+//if (!aim) {
+		if (cam != null) {
+			//Take the forward vector of the camera (from its transform) and
+			//eliminate the y component
+			//scale the camera forward with the mask (1,0,1) to eliminate y and normalize it
+			camForward = Vector3.Scale (cam.forward, new Vector3 (1, 0, 1)).normalized;
+        
+			//move input front/backward = forward direction of the camera * user input amount (vertical)
+			//move input left/right = right direction of the camera * user input amount (horizontal)
+			move = vertical * camForward + horizontal * cam.right;
 		} else {
 
-			move = Vector3.zero;
-
-			Vector3 dir = lookPos - transform.position;
-
-			dir.y = 0;
-
-			transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 20 * Time.deltaTime);
-
-			anim.SetFloat("Forward",vertical);
-			anim.SetFloat("Turn", horizontal);
-
+			//if there is not a camera, use the global forward (+z) and right ( +x)
+			move = vertical * Vector3.forward + horizontal * Vector3.right;
 		}
-        if (move.magnitude > 1) // make sure the movement is normalizd
-            move.Normalize();
+/*	} else {
 
-        bool walkToggle = Input.GetKey(KeyCode.LeftShift) || aim;
+	move = Vector3.zero;
 
-        float walkMultiplier = 1;
+	Vector3 dir = lookPos - transform.position;
 
-        if (walkByDefault)
-        {
-            if (walkToggle)
-            {
-                walkMultiplier = 1;
-            }
-            else
-            {
-                walkMultiplier = 0.5f;
-            }
-        }
-        else
-        {
-            if (walkToggle)
-            {
-                walkMultiplier = 0.5f;
-            }
-            else
-            {
-                walkMultiplier = 1;
-            }
-        }
+	dir.y = 0;
+
+	transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 20 * Time.deltaTime);
+
+	anim.SetFloat("Forward",vertical);
+	anim.SetFloat("Turn", horizontal);
+
+}*/
+		if (move.magnitude > 1) // make sure the movement is normalizd
+			move.Normalize ();
+
+		bool walkToggle = Input.GetKey (KeyCode.LeftShift) || aim;
+
+		float walkMultiplier = 1;
+
+		if (walkByDefault) {
+			if (walkToggle) {
+				walkMultiplier = 1;
+			} else {
+				walkMultiplier = 0.5f;
+			}
+		} else {
+			if (walkToggle) {
+				walkMultiplier = 0.5f;
+			} else {
+				walkMultiplier = 1;
+			}
+		}
 
 		lookPos = lookInCameraDirection && cam != null ? transform.position + cam.forward * 100 : transform.position + transform.forward * 100;
 
-        move *= walkMultiplier;
-        character.Move(move,aim,lookPos,jump);
+		move *= walkMultiplier;
+		character.Move (move, aim, lookPos, jump);
 		jump = false;
 		if (transform.position.y <= 7900) {
 			Die ();
@@ -377,6 +399,6 @@ public class UserInput : MonoBehaviour
 		if (character.die) {
 			Die ();
 		}
-    }
+	}
 
 }
