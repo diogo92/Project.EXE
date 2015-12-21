@@ -52,8 +52,8 @@ public class UserInput : MonoBehaviour
 	public bool CanPickUp;
 	public GameObject Item;
 	public GameObject pickText;
-	public UnityEngine.UI.Text curAmmo;
-	public UnityEngine.UI.Text carryingAmmo;
+	public UnityEngine.UI.Text hp;
+	public UnityEngine.UI.Text currPower;
 
 
 
@@ -141,17 +141,6 @@ col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 	void Update ()
 	{
 
-
-		if (GetComponent<CharacterStats> ().Health <= 0) {
-			anim.SetTrigger("Die");
-			if(anim.GetCurrentAnimatorStateInfo(0).IsTag("Dead")){
-				this.gameObject.SetActive(false);
-				Destroy(this.gameObject);
-				Application.LoadLevel(Application.loadedLevel);
-			}
-			return;
-		}
-
 		CorrectIK ();
 		if (!ik.DebugAim)
 			aim = Input.GetMouseButton (1);
@@ -232,8 +221,23 @@ else{
 
 	void UpdateUI ()
 	{
-		curAmmo.text = weaponManager.ActiveWeapon.currAmmo.ToString ();
-		carryingAmmo.text = weaponManager.ActiveWeapon.curCarryingAmmo.ToString ();
+		hp.text = GetComponent<CharacterStats>().Health.ToString ();
+		if (holdingPower == null)
+			return;
+	    switch (holdingPower.GetComponent<ItemID> ().power) {
+		case 1:
+			currPower.text = "Double Jump";
+			break;
+		case 2:
+			currPower.text = "X-Ray";
+			break;
+		case 3:
+			currPower.text = "Time Freeze";
+			break;
+		default:
+			character.hasDoubleJumpAbility = false;
+			break;
+		}
 	}
 
 
@@ -333,7 +337,12 @@ else{
 
 	void Die ()
 	{
-		Application.LoadLevel (Application.loadedLevel);
+		anim.SetTrigger("Die");
+		if(anim.GetCurrentAnimatorStateInfo(0).IsTag("Dead")){
+			this.gameObject.SetActive(false);
+			Destroy(this.gameObject);
+			Application.LoadLevel(Application.loadedLevel);
+		}
 	}
 
 

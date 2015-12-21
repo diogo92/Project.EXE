@@ -73,7 +73,16 @@ public class CharMove : MonoBehaviour
 		if (collision.gameObject.tag.Equals ("Lava")) {
 			die = true;
 		}
+		if (collision.gameObject.tag.Equals ("MovingPlatform")) {
+			transform.parent=collision.gameObject.transform;
+		}
 		
+	}
+
+	void OnCollisionExit (Collision collision){
+		if (collision.gameObject.tag.Equals ("MovingPlatform")) {
+			transform.parent=null;
+		}
 	}
 	void OnAnimatorMove ()
 	{
@@ -186,7 +195,9 @@ public class CharMove : MonoBehaviour
 
 	void Update ()
 	{
-		if (!onGround) {
+		if (GetComponent<CharacterStats> ().Health <= 0)
+			die = true;
+		if (tag=="Player" && !onGround) {
 			if (Mathf.Abs(rigidBody.velocity.y) < 0.001f) {
 				rigidBody.position = new Vector3 (rigidBody.position.x + 0.1f, rigidBody.position.y + 0.1f, rigidBody.position.z +0.1f);
 			}

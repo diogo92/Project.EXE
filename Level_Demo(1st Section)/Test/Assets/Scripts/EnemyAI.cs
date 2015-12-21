@@ -21,7 +21,7 @@ public class EnemyAI : MonoBehaviour {
 
 	float patrolTimer;
 	public float waitingTime = 4;
-	public float attackRate = 2;
+	public float attackRate = 1f;
 	float attackTimer;
 
 	public List<GameObject> Enemies = new List<GameObject>();
@@ -79,12 +79,15 @@ public class EnemyAI : MonoBehaviour {
 		if (Enemies.Count > 0) {
 			if(!EnemyToAttack){
 				foreach(GameObject enGo in Enemies){
-					Vector3 direction = enGo.transform.position - transform.position;
+					if(enGo.tag=="Player")
+						EnemyToAttack=enGo;
+					/*Vector3 direction = enGo.transform.position - transform.position;
 					float angle = Vector3.Angle(direction,transform.forward);
 
 					if(angle < 110f * 0.5f){
 						RaycastHit hit;
-						if(Physics.Raycast(transform.position + transform.up, direction.normalized, out hit, 15)){
+
+						if(Physics.Raycast(transform.position, direction.normalized, out hit, 15)){
 							if(hit.collider.gameObject.GetComponent<CharacterStats>()){
 								if(hit.collider.gameObject.GetComponent<CharacterStats>().Id != GetComponent<CharacterStats>().Id){
 
@@ -92,7 +95,7 @@ public class EnemyAI : MonoBehaviour {
 								}
 							}
 						}
-					}
+					}*/
 				}
 			}
 			else{
@@ -123,24 +126,23 @@ public class EnemyAI : MonoBehaviour {
 			attackTimer = 0;
 		}*/
 		agent.speed = 1;
-		if (agent.remainingDistance >= agent.stoppingDistance) {
 			agent.transform.position = transform.position;
 			agent.destination = EnemyToAttack.transform.position;
 			Vector3 velocity = agent.desiredVelocity * 0.5f;
 			charMove.Move (velocity, false, targetPos, false);
-		}
 		transform.LookAt(EnemyToAttack.transform.position);
 		attackTimer += Time.deltaTime;
 		
 		if (attackTimer > attackRate) {
 			anim.SetTrigger ("Fire");
-			if (fightObject.GetComponent<FightObjectScript> ().enemies.Count > 0) {
-				for(int i = fightObject.GetComponent<FightObjectScript> ().enemies.Count - 1;i >= 0; i--){
-					if(!((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().GetCurrentAnimatorStateInfo(0).IsTag("Dying")){
-					((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().SetTrigger("Take_Punch");
-					((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<CharacterStats> ().Health--;
-					if(((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject == null)
-						fightObject.GetComponent<FightObjectScript> ().enemies.RemoveAt (i);
+			FightObjectScript fo = fightObject.GetComponent<FightObjectScript> ();
+			if (fo.enemies.Count > 0) {
+				for(int i = fo.enemies.Count - 1;i >= 0; i--){
+					if(!((Collider)fo.enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().GetCurrentAnimatorStateInfo(0).IsTag("Dying")){
+						AttackEnemy(((Collider)fo.enemies[i]).gameObject);
+						
+						if(((Collider)fo.enemies[i]).gameObject == null)
+							fightObject.GetComponent<FightObjectScript> ().enemies.RemoveAt (i);
 					}
 				}
 				
@@ -149,6 +151,12 @@ public class EnemyAI : MonoBehaviour {
 		}
 		
 	}
+
+	void AttackEnemy(GameObject enemy){
+		enemy.transform.parent.GetComponent<Animator> ().SetTrigger("Take_Punch");
+		enemy.transform.parent.GetComponent<CharacterStats> ().Health-=10;
+	}
+
 
 	void OnAnimatorIK(){
 		if (EnemyToAttack) {
