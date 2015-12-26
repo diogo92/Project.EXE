@@ -49,15 +49,22 @@ public class FreeCameraLook : Pivot {
 		activeCrosshair = GameObject.FindGameObjectWithTag ("CrosshairManager").GetComponent<CrosshairManager>().activeCrosshair;
 
 	}
-	
+
+
 	// Update is called once per frame
 	protected override void Update () {
 		base.Update ();
-		HandleRotationMovement ();
-		if (lockCursor && Input.GetMouseButtonUp (0)) {
-			Screen.lockCursor = lockCursor;
 
+		HandleRotationMovement ();
+		if (Input.GetKey (KeyCode.Escape))
+			lockCursor = !lockCursor;
+		Screen.lockCursor = lockCursor;
+		
+		if (lockCursor) {
+			Cursor.lockState = CursorLockMode.Locked;
+			Cursor.visible = false;
 		}
+	
 	}
 	//
 	void OnDisable(){

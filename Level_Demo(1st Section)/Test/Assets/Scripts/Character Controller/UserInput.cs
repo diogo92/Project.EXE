@@ -3,37 +3,45 @@ using System.Collections;
 
 public class UserInput : MonoBehaviour
 {
-
-
-	public GameObject fightObject;
-
-	public bool walkByDefault = false;
+	//Power stuff
 	bool jump = false;
+	public GameObject holdingPower;
+	bool freeze = true;
+
+	//Pickup stuff
+	public bool CanPickUp;
+	public GameObject Item;
+
+	//Fight stuff
+	public GameObject fightObject;
+	bool attack = true;
+
+
+	//Character controller and Camerastuff
+	public bool walkByDefault = false;
 	private CharMove character;
 	private Transform cam;
 	private Vector3 camForward;
 	private Vector3 move;
-//Camera
-//float cameraForward;
-	public bool aim;
-	public float aimingWeight;
-
-	bool attack = true;
-
 	public bool lookInCameraDirection;
 	Vector3 lookPos;
+//Camera
+//float cameraForward;
 
+	//Shooting and Weapon stuff -- NOT USED
+	public bool aim;
+	public float aimingWeight;
 	WeaponManager weaponManager;
-
 	public bool debugShoot;
-
 	WeaponManager.WeaponType weaponType;
 
+
+	//Animator stuff
 	CapsuleCollider col;
 	float startHeight;
 	Animator anim;
-//Ik stuff
 
+	//Ik stuff
 	[SerializeField]
 	public IK ik;
 	[System.Serializable]
@@ -49,15 +57,14 @@ public class UserInput : MonoBehaviour
 
 	FreeCameraLook cameraFunctions;
 
-	public bool CanPickUp;
-	public GameObject Item;
+
+	//UI
 	public GameObject pickText;
 	public UnityEngine.UI.Text hp;
 	public UnityEngine.UI.Text currPower;
 
 
 
-	public GameObject holdingPower;
 
 	void Start ()
 	{
@@ -103,6 +110,33 @@ public class UserInput : MonoBehaviour
 	}
 
 
+	IEnumerator Freeze ()
+	{
+		//freeze
+		GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+		foreach (GameObject enemy in enemies) {
+			enemy.GetComponent<Animator>().enabled = false;
+			enemy.GetComponent<CharMove>().enabled = false;
+			enemy.GetComponent<EnemyAI>().enabled = false;
+			enemy.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+			
+		}
+		print ("Frozen");
+		yield return new WaitForSeconds (5f);
+		//unfreeze
+		foreach (GameObject enemy in enemies) {
+			enemy.GetComponent<Animator>().enabled = true;
+			enemy.GetComponent<CharMove>().enabled = true;
+			enemy.GetComponent<EnemyAI>().enabled = true;
+			enemy.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+			enemy.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+		}
+		print ("Unfrozen");
+		yield return new WaitForSeconds (10f);
+		print ("Freeze ready");
+		freeze = true;
+	}
+
 	void AdditionalInput ()
 	{
 /*	if (anim.GetFloat ("Forward") > 0.5f) {
@@ -110,7 +144,14 @@ public class UserInput : MonoBehaviour
 		anim.SetTrigger ("Vault");
 	}
 }*/
-		if (Input.GetButtonDown ("Crouch")) {
+
+		if (holdingPower != null && holdingPower.GetComponent<ItemID> ().power == 3) {
+			if(Input.GetKeyDown(KeyCode.LeftControl) && freeze){
+				freeze = false;
+				StartCoroutine("Freeze");
+			}
+		}
+		if (Input.GetKeyDown (KeyCode.Space)) {
 			jump = true;
 		}
 		if (Input.GetKeyDown (KeyCode.U)) {
@@ -137,6 +178,8 @@ col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 		yield return new WaitForSeconds (0.7f);
 		attack = true;
 	}
+
+
 
 	void Update ()
 	{
