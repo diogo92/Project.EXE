@@ -26,7 +26,7 @@ public class EnemyAI : MonoBehaviour {
 
 	public List<GameObject> Enemies = new List<GameObject>();
 	public GameObject EnemyToAttack;
-	
+
 
 	public enum AIstate{
 		Patrol,Attack
@@ -56,7 +56,10 @@ public class EnemyAI : MonoBehaviour {
 			anim.SetTrigger("Die");
 			if(anim.GetCurrentAnimatorStateInfo(0).IsTag("Dead")){
 				if(GetComponent<CharacterStats> ().dropable != null){
-					GameObject go = Instantiate((Object)GetComponent<CharacterStats> ().dropable,transform.position,Quaternion.identity) as GameObject;
+
+					GameObject go = Instantiate((Object)GetComponent<CharacterStats> ().dropable,new Vector3(transform.position.x,transform.position.y + 1, transform.position.z),Quaternion.identity) as GameObject;
+					go.transform.parent=null;
+
 				}
 				this.gameObject.SetActive(false);
 				Destroy(this.gameObject);

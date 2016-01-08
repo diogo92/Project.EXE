@@ -6,6 +6,9 @@ public class PickableItem : MonoBehaviour {
 	public bool CharacterInTrigger;
 	public GameObject Owner;
 
+	void Start(){
+		GetComponent<SphereCollider> ().radius = 3;
+	}
 	void OnTriggerEnter(Collider other){
 		if (other.GetComponent<CharacterStats>()) {
 			CharacterInTrigger = true;

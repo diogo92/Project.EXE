@@ -105,7 +105,7 @@ public class WeaponControl : MonoBehaviour {
 				}
 
 				boxCol.isTrigger = false;
-				rigidBody.isKinematic = false;
+				rigidBody.isKinematic = true;
 
 				if(pickableItem.CharacterInTrigger){
 					if(pickableItem.Owner.GetComponent<UserInput>()){

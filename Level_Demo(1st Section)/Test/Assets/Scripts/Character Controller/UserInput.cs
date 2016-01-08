@@ -62,7 +62,7 @@ public class UserInput : MonoBehaviour
 	public GameObject pickText;
 	public UnityEngine.UI.Text hp;
 	public UnityEngine.UI.Text currPower;
-
+	public GameObject crosshair;
 
 
 
@@ -193,10 +193,14 @@ col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 //if (aim) {
 		if (holdingPower != null && holdingPower.GetComponent<ItemID> ().power == 2) {
 			GetComponent<XrayPower> ().XRayPower ();
+			crosshair.SetActive (true);
+		} else {
+			crosshair.SetActive (false);
 		}
 		bool canFire = SharedFunctions.CheckAmmo (weaponManager.ActiveWeapon);
 		//if(!weaponManager.ActiveWeapon.CanBurst){
 		if (Input.GetMouseButtonDown (0) && attack/* && !anim.GetCurrentAnimatorStateInfo(2).IsTag("Reload") || debugShoot*/) {
+			GetComponent<CharacterSoundController>().PlayPunch();
 			StartCoroutine ("resetAttack");
 			anim.SetTrigger ("Fire");
 			if (fightObject.GetComponent<FightObjectScript> ().enemies.Count > 0) {
@@ -381,6 +385,7 @@ else{
 	void Die ()
 	{
 		anim.SetTrigger("Die");
+		GetComponent<CharacterSoundController> ().PlayDie ();
 		if(anim.GetCurrentAnimatorStateInfo(0).IsTag("Dead")){
 			this.gameObject.SetActive(false);
 			Destroy(this.gameObject);
@@ -435,7 +440,6 @@ else{
 			move.Normalize ();
 
 		bool walkToggle = Input.GetKey (KeyCode.LeftShift) || aim;
-
 		float walkMultiplier = 1;
 
 		if (walkByDefault) {
@@ -451,9 +455,11 @@ else{
 				walkMultiplier = 1;
 			}
 		}
-
+		if ((horizontal != 0 || vertical !=0) && anim.GetCurrentAnimatorStateInfo(0).IsTag("Grounded")) {
+			GetComponent<CharacterSoundController>().PlayWalk(walkToggle);
+		}
 		lookPos = lookInCameraDirection && cam != null ? transform.position + cam.forward * 100 : transform.position + transform.forward * 100;
-
+		
 		move *= walkMultiplier;
 		character.Move (move, aim, lookPos, jump);
 		jump = false;

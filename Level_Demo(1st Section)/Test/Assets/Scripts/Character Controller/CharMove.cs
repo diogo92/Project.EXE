@@ -15,14 +15,7 @@ public class CharMove : MonoBehaviour
 	public bool hasDoubleJumpAbility = false;
 	public bool doubleJump = false;
 
-
-
 	Animator animator;
-
-
-
-
-
 
 	Vector3 moveInput; 
 	float turnAmount; 
