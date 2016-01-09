@@ -12,7 +12,6 @@ public class EnemyAI : MonoBehaviour {
 	public List<Transform> waypoints = new List<Transform>();
 	float targetTolerance = 1;	
 	int waypointIndex;
-
 	Vector3 targetPos;
 
 	Animator anim;
@@ -52,7 +51,7 @@ public class EnemyAI : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		if (GetComponent<CharacterStats> ().Health <= 0) {
+		if (GetComponent<CharacterStats> ().Health <= 0 ) {
 			anim.SetTrigger("Die");
 			if(anim.GetCurrentAnimatorStateInfo(0).IsTag("Dead")){
 				if(GetComponent<CharacterStats> ().dropable != null){

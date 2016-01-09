@@ -155,7 +155,7 @@ public class UserInput : MonoBehaviour
 			jump = true;
 		}
 		if (Input.GetKeyDown (KeyCode.U)) {
-			transform.position = new Vector3 (transform.position.x, transform.position.y + 0.05f, transform.position.z);
+			transform.position = new Vector3 (transform.position.x, transform.position.y + 0.1f, transform.position.z);
 		}
 	}
 
@@ -186,15 +186,17 @@ col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 
 		CorrectIK ();
 		if (!ik.DebugAim)
-			aim = Input.GetMouseButton (1);
+	//		aim = Input.GetMouseButton (1);
 
 
 		weaponManager.aim = aim;
 //if (aim) {
-		if (holdingPower != null && holdingPower.GetComponent<ItemID> ().power == 2) {
+		if (holdingPower != null && Input.GetMouseButton(1) && holdingPower.GetComponent<ItemID> ().power == 2 ) {
 			GetComponent<XrayPower> ().XRayPower ();
+			GetComponent<CharacterSoundController>().PlayXray();
 			crosshair.SetActive (true);
 		} else {
+			GetComponent<CharacterSoundController>().StopXray();
 			crosshair.SetActive (false);
 		}
 		bool canFire = SharedFunctions.CheckAmmo (weaponManager.ActiveWeapon);
@@ -205,7 +207,7 @@ col.height = Mathf.Lerp (startHeight, 0.5f, sizeCurve);*/
 			anim.SetTrigger ("Fire");
 			if (fightObject.GetComponent<FightObjectScript> ().enemies.Count > 0) {
 				for(int i = fightObject.GetComponent<FightObjectScript> ().enemies.Count - 1;i >= 0; i--){
-					if(!((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().GetCurrentAnimatorStateInfo(0).IsTag("Dying")){
+					if(((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i] != null) && (!((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().GetCurrentAnimatorStateInfo(0).IsTag("Dying") && !((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().GetCurrentAnimatorStateInfo(0).IsTag("Dead"))){
 					((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<Animator> ().SetTrigger("Take_Punch");
 					((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject.transform.parent.GetComponent<CharacterStats> ().Health--;
 					if(((Collider)fightObject.GetComponent<FightObjectScript> ().enemies[i]).gameObject == null)
@@ -454,8 +456,8 @@ else{
 			} else {
 				walkMultiplier = 1;
 			}
-		}
-		if ((horizontal != 0 || vertical !=0) && anim.GetCurrentAnimatorStateInfo(0).IsTag("Grounded")) {
+		}	
+		if ((horizontal != 0 || vertical !=0)  && anim.GetCurrentAnimatorStateInfo(0).IsTag("Grounded")){
 			GetComponent<CharacterSoundController>().PlayWalk(walkToggle);
 		}
 		lookPos = lookInCameraDirection && cam != null ? transform.position + cam.forward * 100 : transform.position + transform.forward * 100;
