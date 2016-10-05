@@ -3,6 +3,7 @@ using System.Collections;
 
 public class FightObjectScript : MonoBehaviour {
 
+	//Checks collision between an enemy and the object
 	public ArrayList enemies;
 	void Start(){
 		enemies = new ArrayList ();

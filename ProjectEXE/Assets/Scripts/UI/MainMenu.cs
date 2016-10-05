@@ -3,7 +3,7 @@ using System.Collections;
 
 public class MainMenu : MonoBehaviour {
 
-
+	//Main Menu behaviour, for showing the how to play screen and starting the game, while checking for previous checkpoints
 	public GameObject htpScreen;
 
 	public void StartGame(){

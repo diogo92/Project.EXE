@@ -3,7 +3,7 @@ using System.Collections;
 
 public class EndingPlatform : MonoBehaviour {
 
-
+	//Ends the game when reaching the final platform
 	public GameObject text;
 	bool end = false;
 	void OnCollisionEnter(Collision col){

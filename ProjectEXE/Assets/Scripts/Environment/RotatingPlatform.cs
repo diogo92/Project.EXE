@@ -3,6 +3,8 @@ using System.Collections;
 
 public class RotatingPlatform : MonoBehaviour {
 
+	//Rotating platform behaviour
+
 	public float xspeed=0;
 	public float yspeed=0;
 	public float zspeed=0;

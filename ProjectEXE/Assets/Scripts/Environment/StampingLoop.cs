@@ -3,8 +3,10 @@ using System.Collections;
 
 public class StampingLoop : MonoBehaviour {
 
+	//Stamping machines' behaviour
+
 	bool newClip = true;
-	// Update is called once per frame
+
 	void Update () {
 		if (newClip) {
 			StartCoroutine ("WaitClipLoop");

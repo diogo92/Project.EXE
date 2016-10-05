@@ -3,6 +3,8 @@ using System.Collections;
 
 public class PickableItem : MonoBehaviour {
 
+	//Behaviour for pickable objects
+
 	public bool CharacterInTrigger;
 	public GameObject Owner;
 

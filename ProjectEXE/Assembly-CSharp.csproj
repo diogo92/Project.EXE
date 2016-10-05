@@ -6,7 +6,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{A513BC8D-6A7D-D6C5-EEBE-D27CF600D276}</ProjectGuid>
+    <ProjectGuid>{2D9C0307-1651-B8D4-57C3-C1D3BA832BF9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -69,7 +69,6 @@
      <Compile Include="Assets\Scripts\Environment\CastScript.cs" />
      <Compile Include="Assets\Scripts\Environment\Checkpoint.cs" />
      <Compile Include="Assets\Scripts\Environment\DestroyCast.cs" />
-     <Compile Include="Assets\Scripts\Environment\Destructible.cs" />
      <Compile Include="Assets\Scripts\Environment\EndingPlatform.cs" />
      <Compile Include="Assets\Scripts\Environment\MovingFloor.cs" />
      <Compile Include="Assets\Scripts\Environment\RotatingPlatform.cs" />
@@ -171,7 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
-      <Project>{6BCF1753-8618-A6C0-7F1D-4322E3AED478}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
+      <Project>{163E4B22-F6EB-A5CE-AB58-0C75FF7B6472}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

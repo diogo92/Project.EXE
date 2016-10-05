@@ -3,6 +3,8 @@ using System.Collections;
 
 public class CharacterSoundController : MonoBehaviour {
 
+	//Sound handler
+
 	bool dead = false;
 	AudioSource audioSource;
 	public AudioSource xraySource;

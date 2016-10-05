@@ -3,6 +3,8 @@ using System.Collections;
 
 public class SpawnCast : MonoBehaviour {
 
+	//Cast spawner in the lava section
+
 	public GameObject castPrefab;
 	float timepassed = 0f;
 

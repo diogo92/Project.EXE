@@ -3,12 +3,12 @@ using System.Collections;
 
 public class XrayPower : MonoBehaviour
 {
-
+	//Xray power behaviour
 	public Material[] materials;
 	public float radius = 5f;
 	GameObject lastHit;
-	// Update is called once per frame
 
+	//Raycast to mouse position, if an invisible object is hit, it turns visible
 	public void XRayPower ()
 	{
 		// get mouse pos

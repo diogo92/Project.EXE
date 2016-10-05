@@ -5,40 +5,46 @@ using System.Linq;
 
 public class EnemyAI : MonoBehaviour {
 
-	NavMeshAgent agent;
-	CharMove charMove;
-	public GameObject fightObject;
-	public GameObject waypointHolder;
+	//Enemy AI
+
 	public List<Transform> waypoints = new List<Transform>();
+	public List<GameObject> Enemies = new List<GameObject>();
 	float targetTolerance = 1;	
 	int waypointIndex;
 	Vector3 targetPos;
 
+	//References
+	public GameObject fightObject;
+	public GameObject waypointHolder;
+
 	Animator anim;
 	WeaponManager weaponManager;
+	NavMeshAgent agent;
+	CharMove charMove;
+	public GameObject EnemyToAttack;
 
-
+	//Timers
 	float patrolTimer;
 	public float waitingTime = 4;
 	public float attackRate = 1f;
 	float attackTimer;
 
-	public List<GameObject> Enemies = new List<GameObject>();
-	public GameObject EnemyToAttack;
 
 
+	//To define if enemy is Patrolling or Attacking
 	public enum AIstate{
 		Patrol,Attack
 	}
-
 	public AIstate aiState;
-	// Use this for initialization
+
+
 	void Start () {
 		agent = GetComponentInChildren<NavMeshAgent> ();
 		charMove = GetComponent<CharMove> ();
 		anim = GetComponent<Animator> ();
 		weaponManager = GetComponent<WeaponManager> ();
 
+		//Retreives waypoints' transforms from a game object containing them
 		if (waypointHolder) {
 			Transform[] wayp = waypointHolder.GetComponentsInChildren<Transform> ();
 
@@ -49,10 +55,11 @@ public class EnemyAI : MonoBehaviour {
 			}
 		} 
 	}
-	
-	// Update is called once per frame
+
+
 	void Update () {
 
+		//Check if is dead
 		if (GetComponent<CharacterStats> ().Health <= 0 ) {
 			anim.SetBool("Dead",true);
 			anim.SetTrigger("Die");
@@ -68,6 +75,8 @@ public class EnemyAI : MonoBehaviour {
 			}
 			return;
 		}
+
+		//Determine state
 		DecideState ();
 
 		switch (aiState) {
@@ -80,6 +89,7 @@ public class EnemyAI : MonoBehaviour {
 		}
 	}
 
+	//Checks if the player is nearby
 	void DecideState(){
 		if (Enemies.Count > 0) {
 			if(!EnemyToAttack){
@@ -94,17 +104,19 @@ public class EnemyAI : MonoBehaviour {
 		}
 	}
 
+	//Attack Player
 	void Attack(){
+		//Move Enemy near the player
 		agent.speed = 1.5f;
-			agent.transform.position = transform.position;
-			agent.destination = EnemyToAttack.transform.position;
-			Vector3 velocity = agent.desiredVelocity * 0.5f;
-			charMove.Move (velocity, false, targetPos, false);
+		agent.transform.position = transform.position;
+		agent.destination = EnemyToAttack.transform.position;
+		Vector3 velocity = agent.desiredVelocity * 0.5f;
+		charMove.Move (velocity, false, targetPos, false);
 		transform.LookAt(EnemyToAttack.transform.position);
 		attackTimer += Time.deltaTime;
-		
-		if (attackTimer > attackRate) {
 
+		//Attacks player in a rate by checking colliders
+		if (attackTimer > attackRate) {
 			anim.SetTrigger ("Fire");
 			if (fightObject.GetComponent<FightObjectScript> ().enemies.Count > 0) {
 				for(int i = fightObject.GetComponent<FightObjectScript> ().enemies.Count - 1;i >= 0; i--){
@@ -123,7 +135,7 @@ public class EnemyAI : MonoBehaviour {
 		}
 		
 	}
-
+		
 	void AttackEnemy(GameObject enemy){
 		enemy.transform.parent.GetComponent<Animator> ().SetTrigger("Take_Punch");
 		enemy.transform.parent.GetComponent<CharacterStats> ().Health-=10;
@@ -139,42 +151,8 @@ public class EnemyAI : MonoBehaviour {
 		}
 	}
 
-	void ShootRay(){
-		RaycastHit hit;
-		GameObject go = Instantiate (weaponManager.bulletPrefab, transform.position, Quaternion.identity) as GameObject;
-		LineRenderer line = go.GetComponent<LineRenderer> ();
 
-		Vector3 startPos = weaponManager.ActiveWeapon.bulletSpawn.TransformPoint (Vector3.zero);
-		Vector3 endPos = Vector3.zero;
-
-		int mask = ~(1 << 9);
-
-		Vector3 directionToAttack = EnemyToAttack.transform.position - transform.position;
-
-		if (Physics.Raycast (startPos,directionToAttack,out hit, Mathf.Infinity, mask)) {
-			float distance = Vector3.Distance(weaponManager.ActiveWeapon.bulletSpawn.transform.position,hit.point);
-			RaycastHit[] hits = Physics.RaycastAll(startPos,hit.point - startPos, distance);
-
-			foreach(RaycastHit hit2 in hits){
-				if(hit2.transform.GetComponent<Rigidbody>()){
-					Vector3 direction = hit2.transform.position - transform.position;
-					direction = direction.normalized;
-					hit2.transform.GetComponent<Rigidbody>().AddForce(direction * 200);
-				}
-				else if(hit2.transform.GetComponent<Destructible>()){
-					hit2.transform.GetComponent<Destructible>().destruct = true;
-				}
-			}
-
-			endPos = hit.point;
-		}
-
-		line.SetPosition (0, startPos);
-		line.SetPosition (1, endPos);
-
-	}
-
-
+	//When patrolling, moves to target waypoints
 	void Patrolling(){
 		agent.speed = 1;
 

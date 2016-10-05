@@ -4,7 +4,8 @@ using System.Collections;
 [RequireComponent(typeof(ItemID))]
 [RequireComponent(typeof(Rigidbody))]
 public class WeaponControl : MonoBehaviour {
-
+	
+	//Used for reference only, no weapons in the game
 
 	public bool equip;
 	public WeaponManager.WeaponType weaponType;

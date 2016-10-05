@@ -3,6 +3,8 @@ using System.Collections;
 
 public class SightScript : MonoBehaviour {
 
+	//Enemy sight handler
+
 	CharacterStats charStat;
 	EnemyAI enAI;
 

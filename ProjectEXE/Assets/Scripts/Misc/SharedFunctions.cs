@@ -2,7 +2,9 @@
 using System.Collections;
 
 public class SharedFunctions : MonoBehaviour {
-	
+	//Main funtion is to Pickup powerup items
+	//Weapon related stuff is used for reference only
+
 	public static void PickupItem(GameObject owner, GameObject item){
 		ItemID.ItemType id = item.GetComponent<ItemID> ().itemType;
 		switch(id){

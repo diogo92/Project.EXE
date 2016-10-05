@@ -4,8 +4,10 @@ using System.Collections;
 public class CharMove : MonoBehaviour
 {
 
-	public float raything1 = 0.1f;
-	public float raything2 = 0.1f;
+	//Handler for player character movement
+
+	public float raycast1 = 0.1f;
+	public float raycast2 = 0.1f;
 	public float moveSpeedMultiplier = 1;
 	float stationaryTurnSpeed = 180; 
 	float movingTurnSpeed = 360;
@@ -38,6 +40,7 @@ public class CharMove : MonoBehaviour
 	Vector3 currentLookPos;
    
 	void Awake(){
+		//Checking for checkpoints
 		if (gameObject.tag == "Player" && PlayerPrefs.HasKey ("X")) {
 			transform.position = new Vector3 (PlayerPrefs.GetFloat ("X"), PlayerPrefs.GetFloat ("Y"), PlayerPrefs.GetFloat ("Z"));
 		}
@@ -70,6 +73,8 @@ public class CharMove : MonoBehaviour
 	}
  	
 	void OnTriggerEnter (Collider col){
+		//Checks if is inside a complex geometry area, and switches collider to a capsule one
+		//because the player would get stuck inside the area 
 		if (col.gameObject.tag == "Complex" && !GetComponent<CharacterController> ()) {
 			GetComponent<CapsuleCollider>().radius = 0.2f;
 			GetComponent<CapsuleCollider>().height = 1.1f;
@@ -85,14 +90,17 @@ public class CharMove : MonoBehaviour
 		}
 	}
 
+	//Various environment checking
 	void OnCollisionEnter (Collision collision)
 	{
 		if (collision.gameObject.tag.Equals ("Lava")) {
 			die = true;
 		}
+		//If player jumps on a moving platform, it becomes his parent
 		if (collision.gameObject.tag.Equals ("MovingPlatform")) {
 			transform.parent=collision.gameObject.transform;
 		}
+		//General environment hazards
 		if (collision.gameObject.tag.Equals ("GeneralHazard")) {
 			StartCoroutine("knockback");
 			Vector3 dir = (collision.transform.position - transform.position).normalized;
@@ -114,12 +122,12 @@ public class CharMove : MonoBehaviour
 			transform.parent=null;
 		}
 	}
+
+
 	void OnAnimatorMove ()
 	{
 		if (onGround && Time.deltaTime > 0) {
 			Vector3 v = (animator.deltaPosition * moveSpeedMultiplier) / Time.deltaTime; 
-			//Delta position (position difference) - The difference in position between last frame and current one
-			//Speed = position difference of the animator * speed multiplier / time
 			v.y = rigidBody.velocity.y; //store the characters vertical speed, so it does not affect jump speed
 			rigidBody.velocity = v; // update character's speed
 		}
@@ -192,9 +200,9 @@ public class CharMove : MonoBehaviour
 	void GroundCheck ()
 	{
 
-		Ray ray = new Ray (transform.position + Vector3.up * raything1, -Vector3.up);
+		Ray ray = new Ray (transform.position + Vector3.up * raycast1, -Vector3.up);
 		
-		RaycastHit[] hits = Physics.RaycastAll (ray, raything2);
+		RaycastHit[] hits = Physics.RaycastAll (ray, raycast2);
 		rayHitComparer = new RayHitComparer ();
 		System.Array.Sort (hits, rayHitComparer);
 		if (velocity.y < jumpPower * .5f) { 	

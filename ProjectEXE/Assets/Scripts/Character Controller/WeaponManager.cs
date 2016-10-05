@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class WeaponManager : MonoBehaviour {
+	//Used for reference only, no weapons in the game
 
 	public List<GameObject> WeaponList = new List<GameObject>();
 	public WeaponControl ActiveWeapon;

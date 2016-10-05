@@ -4,7 +4,7 @@
 
 private var radius:float=2;
 
-
+//Used for reference only
 function Update () 
 {
 

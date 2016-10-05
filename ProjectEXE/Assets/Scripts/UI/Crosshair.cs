@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using System;
 
 public class Crosshair : MonoBehaviour {
-
+	//For reference only
 
 	public string CrosshairName;
 

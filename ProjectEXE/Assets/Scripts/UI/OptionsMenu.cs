@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 
 public class OptionsMenu : MonoBehaviour {
+	//UI handler for the options menu
 	public GameObject OptionsMenuUI;
 	public bool options = false;
 	public Text volume;
